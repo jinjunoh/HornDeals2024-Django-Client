@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+# Environment variables file
+.env
+*.env
+# Django stuff:
+*.log
+media/  # Media files (if storing user-uploaded files here)
+staticfiles/  # Django collectstatic directory (if not storing statics in version control)
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
