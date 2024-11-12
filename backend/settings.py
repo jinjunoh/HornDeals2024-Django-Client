@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+import pymysql
 
 load_dotenv()
 
@@ -88,6 +89,8 @@ DATABASES = {
     }
 }
 
+pymysql.version_info = (1,4,6,"final",0)
+pymysql.install_as_MySQLdb()
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
