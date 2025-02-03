@@ -49,5 +49,5 @@ def filter_products(request):
     if locations:
         queryset = queryset.filter(location__in=locations)
     
-    serializer = ProductSerializer(queryset, many=True)
+    serializer = ProductSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)

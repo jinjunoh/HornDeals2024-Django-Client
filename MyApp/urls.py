@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 from .views import filter_products
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
@@ -10,3 +12,6 @@ urlpatterns = [
     path('api/users', views.get_users, name='get_users'),
     path('api/filter-products/', filter_products, name='filter_products'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
