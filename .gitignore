@@ -22,4 +22,3 @@ __pycache__/
 *.py[cod]
 *$py.class
 venv/
-db.sqlite3
