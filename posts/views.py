@@ -1,10 +1,21 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Product
-from .serializers import ProductSerializer
+from MyApp.models import Product 
+from MyApp.serializer import ProductSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+
+@api_view(['GET'])  # Ensure that only GET requests are allowed
+def get_categories(request):
+    """
+    Return the list of product categories from Product model.
+    This view doesn't use `request` data as it just returns static category choices.
+    """
+    categories = [{"value": category[0], "label": category[1]} for category in Product.CATEGORY_CHOICES]
+    return Response(categories)
 
 @api_view(['POST'])
+@parser_classes([MultiPartParser, FormParser])
 def create_product(request):
     """
     Create a new product.
@@ -24,7 +35,7 @@ def create_product(request):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 @api_view(['GET'])
 def get_products(request):
     """

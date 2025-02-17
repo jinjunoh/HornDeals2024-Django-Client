@@ -60,8 +60,9 @@ def login_view(request):
             return Response({
                 'error': 'Invalid email or password'
             }, status=status.HTTP_400_BAD_REQUEST)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)@api_view(['POST'])
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['POST'])
 def filter_products(request):
     """
     Expects JSON data like:

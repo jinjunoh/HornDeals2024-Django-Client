@@ -1,10 +1,10 @@
 from rest_framework import serializers
-from .models import Product
+from .models import Post
 
 
 # The Serializer is what converts data to JSON so that the frontend or client
 # understands the Django model instances or querysets
-class ProductSerializer(serializers.ModelSerializer):
+class PostSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product  
-        fields = ['id', 'name', 'price', 'category', 'image'] 
+        model = Post
+        fields = '__all__' 
