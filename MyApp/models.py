@@ -31,6 +31,7 @@ class Product(models.Model):
         blank=True
     )
     image = models.ImageField(upload_to='products/', null=True, blank=True)
+    popularity = models.IntegerField(default=0)
 
     
     def __str__(self):
