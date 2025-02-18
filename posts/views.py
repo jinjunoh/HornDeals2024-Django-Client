@@ -31,6 +31,7 @@ def create_product(request):
     """
     if request.method == 'POST':
         serializer = ProductSerializer(data=request.data)
+        print(serializer)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -94,5 +95,4 @@ def delete_product(request, pk):
     
     product.delete()
     return Response({"message": "Product deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-    
     
