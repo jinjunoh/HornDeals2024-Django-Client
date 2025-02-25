@@ -113,3 +113,13 @@ def profile(request):
             'message': 'Profile updated successfully',
             'user': updated_data
         }, status=status.HTTP_200_OK)
+        
+@api_view(['POST'])
+def increase_popularity(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+        product.popularity += 1
+        product.save()
+        return Response({"popularity": product.popularity}, status=status.HTTP_200_OK)
+    except Product.DoesNotExist:
+        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
