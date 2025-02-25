@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
 from .models import Product
 from .serializer import ProductSerializer, SignUpSerializer, LoginSerializer
@@ -72,3 +73,43 @@ def filter_products(request):
 
     serializer = ProductSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
+
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def profile(request):
+    user = request.user
+
+    if request.method == 'GET':
+        # Use the correct field name: "user" instead of "owner"
+        products = Product.objects.filter(user=user)
+        serializer = ProductSerializer(products, many=True, context={'request': request})
+        user_data = {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        }
+        return Response({
+            'user': user_data,
+            'products': serializer.data
+        }, status=status.HTTP_200_OK)
+
+    elif request.method == 'PUT':
+        data = request.data
+        user.username = data.get('username', user.username)
+        user.email = data.get('email', user.email)
+        user.first_name = data.get('first_name', user.first_name)
+        user.last_name = data.get('last_name', user.last_name)
+        user.save()
+
+        updated_data = {
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        }
+        return Response({
+            'message': 'Profile updated successfully',
+            'user': updated_data
+        }, status=status.HTTP_200_OK)

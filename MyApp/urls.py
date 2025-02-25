@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import filter_products
+from .views import filter_products, profile
 from django.conf import settings
 from django.conf.urls.static import static
 
@@ -13,6 +13,7 @@ urlpatterns = [
     path('api/login/', views.login_view, name='login'),
     path('api/users', views.get_users, name='get_users'),
     path('api/filter-products/', filter_products, name='filter_products'),
+    path('api/profile/', profile, name='profile'),
 ]
 
 if settings.DEBUG:
