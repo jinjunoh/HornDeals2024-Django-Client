@@ -53,14 +53,22 @@ def filter_products(request):
     data = request.data
     category = data.get('category', '')
     price_range = data.get('priceRange', [0, 999999999])
-    locations = data.get('locations', [])
+    sort_by = data.get('sortBy', 'latest')  # Default to 'latest'
+    
     queryset = Product.objects.all()
+    
     if category:
         queryset = queryset.filter(category=category)
+        
     if len(price_range) == 2:
         min_price, max_price = price_range
         queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
-    if locations:
-        queryset = queryset.filter(location__in=locations)
+    
+    # Order the queryset based on the sort option
+    if sort_by == 'latest':
+        queryset = queryset.order_by('-created_at')  # newest posts first
+    elif sort_by == 'popular':
+        queryset = queryset.order_by('-popularity')  # most popular posts first
+
     serializer = ProductSerializer(queryset, many=True, context={'request': request})
     return Response(serializer.data)
