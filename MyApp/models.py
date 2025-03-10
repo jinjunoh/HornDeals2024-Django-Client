@@ -24,7 +24,6 @@ class Product(models.Model):
     # product information
     name = models.CharField(max_length=200)
     price = models.DecimalField(max_digits=8, decimal_places=2)
-    location = models.CharField(max_length=100)
     category = models.CharField(
         max_length=50, 
         choices=CATEGORY_CHOICES, 
