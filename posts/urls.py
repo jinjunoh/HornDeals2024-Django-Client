@@ -10,4 +10,5 @@ urlpatterns = [
     path('api/categories/', views.get_categories, name='get_categories'),
     path('products/update/<int:pk>/', views.update_product, name='update_product'),
     path('products/delete/<int:pk>/', views.delete_product, name='delete_product'),
+    path('api/products/<int:pk>/related/', views.related_products, name = 'related_products')
 ]

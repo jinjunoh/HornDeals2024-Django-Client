@@ -4,6 +4,7 @@ from rest_framework import status
 from MyApp.models import Product 
 from MyApp.serializer import ProductSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
+from random import sample
 
 @api_view(['GET'])  # Ensure that only GET requests are allowed
 def get_categories(request):
@@ -95,4 +96,29 @@ def delete_product(request, pk):
     
     product.delete()
     return Response({"message": "Product deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-    
+
+@api_view(['GET'])
+def related_products(request, pk):
+    try:
+        product = Product.objects.get(id=pk)
+    except Product.DoesNotExist:
+        return Response({"message": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    # Get products from the same category, excluding the current product
+    related = list(Product.objects.filter(category=product.category).exclude(id=pk))
+
+    # If there are fewer than 3 related products, fill the remaining spots
+    if len(related) < 3:
+        additional_products = list(Product.objects.exclude(id=pk).exclude(id__in=[p.id for p in related]))
+        needed = 3 - len(related)
+        
+        if len(additional_products) >= needed:
+            related += sample(additional_products, needed)
+        else:
+            related += additional_products  # Take all available if less than needed
+
+    # Ensure exactly 3 products are returned
+    related = related[:3]
+
+    serializer = ProductSerializer(related, many=True)
+    return Response(serializer.data)
