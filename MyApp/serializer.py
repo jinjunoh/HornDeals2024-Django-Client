@@ -26,6 +26,8 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
 class ProductSerializer(serializers.ModelSerializer):
+    voted = serializers.SerializerMethodField()
+    
     class Meta:
         model = Product
         fields = '__all__'
@@ -38,3 +40,9 @@ class ProductSerializer(serializers.ModelSerializer):
                 return request.build_absolute_uri(image_url)
             return image_url
         return ''
+    
+    def get_voted(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return request.user in obj.voters.all()
+        return False

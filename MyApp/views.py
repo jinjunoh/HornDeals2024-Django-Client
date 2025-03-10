@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -83,7 +83,9 @@ def profile(request):
     if request.method == 'GET':
         # Use the correct field name: "user" instead of "owner"
         products = Product.objects.filter(user=user)
+        favorites = Product.objects.filter(voters=user)
         serializer = ProductSerializer(products, many=True, context={'request': request})
+        favorites_serializer = ProductSerializer(favorites, many=True, context={'request': request})
         user_data = {
             'username': user.username,
             'email': user.email,
@@ -92,7 +94,8 @@ def profile(request):
         }
         return Response({
             'user': user_data,
-            'products': serializer.data
+            'products': serializer.data,
+            'favorites': favorites_serializer.data
         }, status=status.HTTP_200_OK)
 
     elif request.method == 'PUT':
@@ -113,13 +116,30 @@ def profile(request):
             'message': 'Profile updated successfully',
             'user': updated_data
         }, status=status.HTTP_200_OK)
-        
+    
+@api_view(['GET'])
+def product_detail(request, product_id):
+    print("DEBUG: request.user =", request.user)
+    print("DEBUG: is_authenticated =", request.user.is_authenticated)
+    product = get_object_or_404(Product, id=product_id)
+    print("DEBUG: product.voters =", product.voters.all())
+    serializer = ProductSerializer(product, context={'request': request})
+    data = serializer.data
+    print("DEBUG: serializer output =", data)
+    return Response(data)
+
 @api_view(['POST'])
-def increase_popularity(request, product_id):
-    try:
-        product = Product.objects.get(id=product_id)
+@permission_classes([IsAuthenticated])
+def toggle_popularity(request, product_id):
+    user = request.user
+    product = get_object_or_404(Product, id=product_id)
+    if product.voters.filter(pk=user.pk).exists():
+        product.popularity -= 1
+        product.voters.remove(user)
+        voted = False
+    else:
         product.popularity += 1
-        product.save()
-        return Response({"popularity": product.popularity}, status=status.HTTP_200_OK)
-    except Product.DoesNotExist:
-        return Response({"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND)
+        product.voters.add(user)
+        voted = True
+    product.save()
+    return Response({"popularity": product.popularity, "voted": voted}, status=status.HTTP_200_OK)
