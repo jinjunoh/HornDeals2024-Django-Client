@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate
-from .models import Product
+from .models import Product, ProductImage
 
 class SignUpSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -25,9 +25,15 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
+class ProductImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductImage
+        fields = ['id', 'image']
+
 class ProductSerializer(serializers.ModelSerializer):
     voted = serializers.SerializerMethodField()
-    
+    additional_images = ProductImageSerializer(many=True, read_only=True)
+
     class Meta:
         model = Product
         fields = '__all__'
