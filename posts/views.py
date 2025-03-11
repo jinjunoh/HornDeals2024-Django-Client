@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.response import Response
 from rest_framework import status
-from MyApp.models import Product 
+from MyApp.models import Product, ProductImage
 from MyApp.serializer import ProductSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from random import sample
@@ -19,23 +19,29 @@ def get_categories(request):
 @parser_classes([MultiPartParser, FormParser])
 def create_product(request):
     """
-    Create a new product.
-    Expects JSON data like:
+    Create a new product with multiple images.
+    Expects multipart/form-data with the following structure:
     {
         "title": "Post Title",
         "name": "Product Name",
         "price": 199.99,
-        "location": "Some Location",
-        "category": "clothing",
-        "image": <image_file>
+        "category": "accessories",
+        "image": <image_file>,
+        "additional_images": [<image_file1>, <image_file2>, ...] (optional, up to 5)
     }
     """
     if request.method == 'POST':
         serializer = ProductSerializer(data=request.data)
-        print(serializer)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            product = serializer.save()
+
+            # Handle multiple additional images
+            additional_images = request.FILES.getlist('additional_images')
+            for img in additional_images[:5]:  # Restrict to a max of 5 images
+                ProductImage.objects.create(product=product, image=img)
+
+            return Response(ProductSerializer(product, context={'request': request}).data, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['GET'])
