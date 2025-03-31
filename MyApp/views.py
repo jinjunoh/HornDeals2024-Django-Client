@@ -123,6 +123,10 @@ def product_detail(request, product_id):
     print("DEBUG: is_authenticated =", request.user.is_authenticated)
     product = get_object_or_404(Product, id=product_id)
     print("DEBUG: product.voters =", product.voters.all())
+
+    product.views += 1
+    product.save()
+    
     serializer = ProductSerializer(product, context={'request': request})
     data = serializer.data
     print("DEBUG: serializer output =", data)
