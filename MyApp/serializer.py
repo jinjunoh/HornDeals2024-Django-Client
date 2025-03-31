@@ -31,6 +31,8 @@ class ProductImageSerializer(serializers.ModelSerializer):
         fields = ['id', 'image']
 
 class ProductSerializer(serializers.ModelSerializer):
+    # revealing username (for useronly delete)
+    user = serializers.ReadOnlyField(source='user.username')
     voted = serializers.SerializerMethodField()
     additional_images = ProductImageSerializer(many=True, read_only=True)
     seller_name = serializers.SerializerMethodField()

@@ -1,10 +1,11 @@
-from rest_framework.decorators import api_view, parser_classes
+from rest_framework.decorators import api_view, parser_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework import status
 from MyApp.models import Product, ProductImage
 from MyApp.serializer import ProductSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from random import sample
+from rest_framework.permissions import IsAuthenticated
 
 @api_view(['GET'])  # Ensure that only GET requests are allowed
 def get_categories(request):
@@ -17,6 +18,7 @@ def get_categories(request):
 
 @api_view(['POST'])
 @parser_classes([MultiPartParser, FormParser])
+@permission_classes([IsAuthenticated])
 def create_product(request):
     """
     Create a new product with multiple images.
@@ -33,7 +35,7 @@ def create_product(request):
     if request.method == 'POST':
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid():
-            product = serializer.save()
+            product = serializer.save(user=request.user)
 
             # Handle multiple additional images
             additional_images = request.FILES.getlist('additional_images')
@@ -90,16 +92,21 @@ def update_product(request, pk):
         return Response(serializer.data)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_logged_in_user(request):
+    return Response({"username": request.user.username})
+
 @api_view(['DELETE'])
 def delete_product(request, pk):
-    """
-    Delete by ID.
-    """
     try:
         product = Product.objects.get(pk=pk)
     except Product.DoesNotExist:
         return Response({"message": "Product not found."}, status=status.HTTP_404_NOT_FOUND)
     
+    if product.user != request.user:
+        return Response({"message": "You are not authorized to delete this product."}, status=status.HTTP_403_FORBIDDEN)
+
     product.delete()
     return Response({"message": "Product deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 

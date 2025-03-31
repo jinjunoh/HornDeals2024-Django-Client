@@ -4,9 +4,6 @@ from .views import filter_products, profile, toggle_popularity, product_detail
 from django.conf import settings
 from django.conf.urls.static import static
 
-
-
-
 urlpatterns = [
     path('api/', views.sample_view, name='sample-view'),
     path('api/signup/', views.signup, name='signup'),
