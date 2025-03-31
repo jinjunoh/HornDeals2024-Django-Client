@@ -33,6 +33,7 @@ class ProductImageSerializer(serializers.ModelSerializer):
 class ProductSerializer(serializers.ModelSerializer):
     voted = serializers.SerializerMethodField()
     additional_images = ProductImageSerializer(many=True, read_only=True)
+    seller_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -52,3 +53,6 @@ class ProductSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return request.user in obj.voters.all()
         return False
+    
+    def get_seller_name(self, obj):
+        return obj.user.username

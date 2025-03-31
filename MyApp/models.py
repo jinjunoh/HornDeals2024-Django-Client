@@ -32,6 +32,8 @@ class Product(models.Model):
     image = models.ImageField(upload_to='products/', null=True, blank=True)
     popularity = models.IntegerField(default=0)
     voters = models.ManyToManyField(get_user_model(), related_name="voted_products", blank=True)
+
+    views = models.PositiveIntegerField(default=0)
     
     def __str__(self):
         return self.name
