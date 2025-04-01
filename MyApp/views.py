@@ -8,6 +8,7 @@ from .serializer import ProductSerializer, SignUpSerializer, LoginSerializer
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from django.db.models import Max
 
 @api_view(['GET'])
 def sample_view(request):
@@ -147,3 +148,8 @@ def toggle_popularity(request, product_id):
         voted = True
     product.save()
     return Response({"popularity": product.popularity, "voted": voted}, status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def max_price(request):
+    max_price_value = Product.objects.aggregate(max_price=Max('price'))['max_price'] or 0
+    return Response({'max_price': max_price_value})
