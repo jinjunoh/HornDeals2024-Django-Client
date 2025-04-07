@@ -8,7 +8,7 @@ from .serializer import ProductSerializer, SignUpSerializer, LoginSerializer
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework import status
-from django.db.models import Max
+from django.db.models import Max, Q
 
 @api_view(['GET'])
 def sample_view(request):
@@ -56,6 +56,7 @@ def filter_products(request):
     category = data.get('category', '')
     price_range = data.get('priceRange', [0, 999999999])
     sort_by = data.get('sortBy', 'latest')  # Default to 'latest'
+    search_query = data.get('search', '').strip()
     
     queryset = Product.objects.all()
     
@@ -65,6 +66,11 @@ def filter_products(request):
     if len(price_range) == 2:
         min_price, max_price = price_range
         queryset = queryset.filter(price__gte=min_price, price__lte=max_price)
+    
+    if search_query:
+        queryset = queryset.filter(
+            Q(name__icontains=search_query) | Q(title__icontains=search_query)
+        )
     
     # Order the queryset based on the sort option
     if sort_by == 'latest':
