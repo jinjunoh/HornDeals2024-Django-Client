@@ -12,12 +12,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from dotenv import load_dotenv
 import os
 from pathlib import Path
+import os
 
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -26,6 +26,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
+USE_AWS = True
 DEBUG = True
 
 ALLOWED_HOSTS = []
@@ -44,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
+    'storages',
 ]
 
 REST_FRAMEWORK = {
@@ -105,17 +108,25 @@ DATABASES = {
 }
 """
 
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        # For Django 3.1+, you can use BASE_DIR / 'db.sqlite3':
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        
-        # Or for older Django versions or if you prefer os.path:
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if USE_AWS:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('RDS_DB_NAME'),
+            'USER': os.getenv('RDS_USERNAME'),
+            'PASSWORD': os.getenv('RDS_PASSWORD'),
+            'HOST': os.getenv('RDS_HOST'),
+            'PORT': os.getenv('RDS_PORT', '5432'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / "db.sqlite3",
+        }
+    }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -159,8 +170,23 @@ LOGOUT_REDIRECT_URL = '/'  # Redirect after logout
 
 STATIC_URL = 'static/'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+if USE_AWS:
+    # S3 Settings
+    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_REGION_NAME = os.getenv('AWS_REGION', 'us-east-2')
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+
+    AWS_QUERYSTRING_AUTH = False  # Optional: makes file URLs cleaner
+else:
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
