@@ -1,6 +1,9 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth import get_user_model
+from storages.backends.s3boto3 import S3Boto3Storage
+
+s3 = S3Boto3Storage()
 
 class Product(models.Model):
     CATEGORY_CHOICES = (
@@ -29,7 +32,7 @@ class Product(models.Model):
         choices=CATEGORY_CHOICES, 
         blank=True
     )
-    image = models.ImageField(upload_to='products/', null=True, blank=True)
+    image = models.ImageField(upload_to='products/', null=True, blank=True, storage=s3)
     popularity = models.IntegerField(default=0)
     voters = models.ManyToManyField(get_user_model(), related_name="voted_products", blank=True)
 
@@ -37,10 +40,10 @@ class Product(models.Model):
     
     def __str__(self):
         return self.name
-
+    
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="additional_images")
-    image = models.ImageField(upload_to='products/additional_images/')
+    image = models.ImageField(upload_to='products/additional_images/', storage=s3)
 
     def __str__(self):
         return f"Image for {self.product.name}"

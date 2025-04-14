@@ -7,6 +7,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from random import sample
 from rest_framework.permissions import IsAuthenticated
 
+
 @api_view(['GET'])  # Ensure that only GET requests are allowed
 def get_categories(request):
     """
@@ -33,7 +34,7 @@ def create_product(request):
     }
     """
     if request.method == 'POST':
-        serializer = ProductSerializer(data=request.data)
+        serializer = ProductSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             product = serializer.save(user=request.user)
 
@@ -41,6 +42,8 @@ def create_product(request):
             additional_images = request.FILES.getlist('additional_images')
             for img in additional_images[:5]:  # Restrict to a max of 5 images
                 ProductImage.objects.create(product=product, image=img)
+
+            print(product.image.url)
 
             return Response(ProductSerializer(product, context={'request': request}).data, status=status.HTTP_201_CREATED)
         

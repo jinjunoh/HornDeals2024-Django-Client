@@ -1,8 +1,6 @@
 from django.urls import path
 from . import views
 from .views import filter_products, profile, toggle_popularity, product_detail, max_price
-from django.conf import settings
-from django.conf.urls.static import static
 
 urlpatterns = [
     path('api/', views.sample_view, name='sample-view'),
@@ -15,6 +13,3 @@ urlpatterns = [
     path("toggle-popularity/<int:product_id>/", toggle_popularity, name="toggle_popularity"),
     path("api/max-price/", max_price, name="max_price"),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
