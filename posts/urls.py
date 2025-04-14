@@ -11,5 +11,7 @@ urlpatterns = [
     path('api/user/', views.get_logged_in_user),
     path('products/update/<int:pk>/', views.update_product, name='update_product'),
     path('products/delete/<int:pk>/', views.delete_product, name='delete_product'),
-    path('api/products/<int:pk>/related/', views.related_products, name = 'related_products')
+    path('api/products/<int:pk>/related/', views.related_products, name = 'related_products'),
+    path('api/top-liked-products/', views.top_liked_products, name='top-liked-products'),
+
 ]

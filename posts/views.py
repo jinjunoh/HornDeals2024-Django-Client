@@ -138,3 +138,12 @@ def related_products(request, pk):
 
     serializer = ProductSerializer(related, many=True)
     return Response(serializer.data)
+
+@api_view(['GET'])
+def top_liked_products(request):
+    """
+    Returns the top 4 most liked (popular) products.
+    """
+    top_products = Product.objects.order_by('-popularity')[:4]
+    serializer = ProductSerializer(top_products, many=True, context={'request': request})
+    return Response(serializer.data)
