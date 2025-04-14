@@ -34,6 +34,7 @@ class ProductSerializer(serializers.ModelSerializer):
     # revealing username (for useronly delete)
     user = serializers.ReadOnlyField(source='user.username')
     voted = serializers.SerializerMethodField()
+    image = serializers.ImageField(required=False)
     additional_images = ProductImageSerializer(many=True, read_only=True)
     seller_name = serializers.SerializerMethodField()
 
@@ -53,8 +54,8 @@ class ProductSerializer(serializers.ModelSerializer):
     def get_voted(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
-            return request.user in obj.voters.all()
+            return obj.voters.filter(id=request.user.id).exists()
         return False
-    
+
     def get_seller_name(self, obj):
         return obj.user.username
