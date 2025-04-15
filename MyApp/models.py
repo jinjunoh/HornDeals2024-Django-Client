@@ -11,7 +11,8 @@ class Product(models.Model):
         ('accessories', 'Accessories'),
         ('tickets', 'Tickets'),
         ('studyMaterials', 'Study Materials'),
-        ('miscellaneous', 'Miscellaneous'),
+        ('miscellaneous', 'Sublease'),
+        ('sublease', 'Miscellaneous'),
     )
 
     # post information
