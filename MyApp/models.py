@@ -12,6 +12,7 @@ class Product(models.Model):
         ('tickets', 'Tickets'),
         ('studyMaterials', 'Study Materials'),
         ('miscellaneous', 'Miscellaneous'),
+        ('sublease', 'Sublease'),
     )
 
     # post information
