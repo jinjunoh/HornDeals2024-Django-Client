@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 from storages.backends.s3boto3 import S3Boto3Storage
 
 s3 = S3Boto3Storage()
@@ -48,3 +49,10 @@ class ProductImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.product.name}"
+    
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='profiles/', null=True, blank=True, storage=s3)
+
+    def __str__(self):
+        return f"{self.user.username}'s Profile"
