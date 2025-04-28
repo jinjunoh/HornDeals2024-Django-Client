@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from .models import Product, ProductImage
 
 class SignUpSerializer(serializers.ModelSerializer):
@@ -59,3 +59,27 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_seller_name(self, obj):
         return obj.user.username
+    
+# serializer.py
+
+from rest_framework import serializers
+from django.contrib.auth.models import User
+from .models import Profile
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['image']  # we only need image for now
+
+class UserSerializer(serializers.ModelSerializer):
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = get_user_model()
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'image']
+
+    def get_image(self, obj):
+        try:
+            return self.context['request'].build_absolute_uri(obj.profile.image.url)
+        except:
+            return None

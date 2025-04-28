@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth.models import User
-from .models import Product
-from .serializer import ProductSerializer, SignUpSerializer, LoginSerializer
+from .models import Product, Profile
+from .serializer import ProductSerializer, SignUpSerializer, LoginSerializer, UserSerializer, ProfileSerializer
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from rest_framework import status
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.db.models import Max, Q
 
 @api_view(['GET'])
@@ -159,3 +160,43 @@ def toggle_popularity(request, product_id):
 def max_price(request):
     max_price_value = Product.objects.aggregate(max_price=Max('price'))['max_price'] or 0
     return Response({'max_price': max_price_value})
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+@parser_classes([MultiPartParser, FormParser])
+def profile(request):
+    user = request.user
+
+    if request.method == 'GET':
+        serializer = UserSerializer(user, context={'request': request})
+        products = user.product_set.all()
+        favorites = user.voted_products.all()
+        product_data = ProductSerializer(products, many=True, context={'request': request}).data
+        favorite_data = ProductSerializer(favorites, many=True, context={'request': request}).data
+        return Response({
+            "user": serializer.data,
+            "products": product_data,
+            "favorites": favorite_data
+        })
+
+    elif request.method == 'PUT':
+        # Update user basic info
+        user.username = request.data.get('username', user.username)
+        user.email = request.data.get('email', user.email)
+        user.first_name = request.data.get('first_name', user.first_name)
+        user.last_name = request.data.get('last_name', user.last_name)
+        user.save()
+
+        # Safely handle uploaded profile image
+        if 'image' in request.FILES:
+            try:
+                profile = user.profile
+            except Exception:
+                from MyApp.models import Profile
+                profile = Profile.objects.create(user=user)
+
+            profile.image = request.FILES['image']
+            profile.save()
+
+        serializer = UserSerializer(user, context={'request': request})
+        return Response({"user": serializer.data})
